@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#SBATCH --job-name=QC
+#SBATCH --account=vasccell
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=14
+#SBATCH --mem=40G
+#SBATCH --time=12:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=cs806@leicester.ac.uk
+#SBATCH --output=%x.out
+#SBATCH --error=%x.err
+#SBATCH --export=NONE
+
+cd $SLURM_SUBMIT_DIR
+
+module load fastqc/0.12.1-hkgpcde  
+
+
+ls /scratch/vasccell/cs806/huvecRNASEQ/rawReads  > /scratch/vasccell/cs806/huvecRNASEQ/huvecRNASEQ_Scripts/allSeq.txt
+
+
+while IFS= read -r F
+do
+fastqc /scratch/vasccell/cs806/huvecRNASEQ/rawReads/$F -t 14 -o /scratch/vasccell/cs806/huvecRNASEQ/fastqcResults
+
+done < /scratch/vasccell/cs806/huvecRNASEQ/huvecRNASEQ_Scripts/allSeq.txt
+
+source ~/miniconda3/bin/activate mypython311
+multiqc /scratch/vasccell/cs806/huvecRNASEQ/fastqcResults -f --interactive -o /scratch/vasccell/cs806/huvecRNASEQ/fastqcResults
+

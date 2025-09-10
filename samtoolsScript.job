@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#SBATCH --job-name=samtools
+#SBATCH --account=vasccell
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=28
+#SBATCH --mem=20G
+#SBATCH --time=48:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=cs806@leicester.ac.uk
+#SBATCH --output=%x.out
+#SBATCH --error=%x.err
+#SBATCH --export=NONE
+
+cd $SLURM_SUBMIT_DIR
+
+module load samtools/1.17-wenuvv5
+
+while IFS= read -r F
+do
+
+  #S1=${F}Aligned.out.sam
+  
+  samtools view -@ 28 -S -b /scratch/vasccell/cs806/huvecRNASEQ/mappedReads/$F | \
+  samtools sort - -@ 28 -o /scratch/vasccell/cs806/huvecRNASEQ/mappedReads/$F.sorted.bam &&
+  samtools index /scratch/vasccell/cs806/huvecRNASEQ/mappedReads/$F.sorted.bam -@ 28
+  samtools view -T /scratch/vasccell/cs806/exprPhenoData/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa \
+  -C -o /scratch/vasccell/cs806/huvecRNASEQ/mappedReads/$F.sorted.bam.cram /scratch/vasccell/cs806/huvecRNASEQ/mappedReads/$F.sorted.bam
+  rm /scratch/vasccell/cs806/huvecRNASEQ/mappedReads/$F
+
+done < /scratch/vasccell/cs806/huvecRNASEQ/huvecRNASEQ_Scripts/allSam.txt

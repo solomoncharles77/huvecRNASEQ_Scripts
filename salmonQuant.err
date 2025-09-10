@@ -1,0 +1,7 @@
+Error in file(file, "rt") : cannot open the connection
+Calls: read.csv -> read.table -> file
+In addition: Warning message:
+In file(file, "rt") :
+  cannot open file '/scratch/vasccell/cs806/exprPhenoData/tx2gene.ensembl.v100.csv': No such file or directory
+Execution halted
+/var/spool/slurmd/job4978623/slurm_script: line 58: /home/c/cs806/miniconda3/envs/mypython311/bin/multiqc: Permission denied
