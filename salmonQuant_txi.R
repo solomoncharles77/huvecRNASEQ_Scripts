@@ -1,7 +1,7 @@
 library(tximport)
 
 
-tx2gene <- read.csv("/scratch/vasccell/cs806/exprPhenoData/tx2gene.ensembl.v100.csv")
+tx2gene <- read.csv("/scratch/vasccell/cs806/exprPhenoData/tx2geneHomo_sapiens.GRCh38.cdna.all.csv")
 
 samples <- read.table("/scratch/vasccell/cs806/huvecRNASEQ/huvecRNASEQ_Scripts/allSeq3.txt", header = F)
 files <- file.path("/scratch/vasccell/cs806/huvecRNASEQ/salmonQuant", samples$V1, "quant.sf")

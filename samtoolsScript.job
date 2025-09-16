@@ -4,7 +4,7 @@
 #SBATCH --account=vasccell
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=28
-#SBATCH --mem=20G
+#SBATCH --mem=40G
 #SBATCH --time=48:00:00
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=cs806@leicester.ac.uk

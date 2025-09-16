@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=14
 #SBATCH --mem=40G
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=cs806@leicester.ac.uk
 #SBATCH --output=%x.out
@@ -26,6 +26,6 @@ fastqc /scratch/vasccell/cs806/huvecRNASEQ/rawReads/$F -t 14 -o /scratch/vasccel
 
 done < /scratch/vasccell/cs806/huvecRNASEQ/huvecRNASEQ_Scripts/allSeq.txt
 
-source ~/miniconda3/bin/activate mypython311
+module load py-multiqc
 multiqc /scratch/vasccell/cs806/huvecRNASEQ/fastqcResults -f --interactive -o /scratch/vasccell/cs806/huvecRNASEQ/fastqcResults
 
