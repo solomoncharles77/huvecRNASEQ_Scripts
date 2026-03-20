@@ -1,0 +1,63 @@
+#!/bin/bash
+
+#SBATCH --job-name=mapping
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=28
+#SBATCH --mem=80G
+#SBATCH --time=24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=youremail@leicester.ac.uk
+#SBATCH --output=%x.out
+#SBATCH --error=%x.err
+#SBATCH --export=NONE
+
+cd $SLURM_SUBMIT_DIR
+
+
+date
+
+# Load modules
+module load star/2.7.10b-m3zkpic
+
+#step 1 - generate genome index
+STAR --runMode genomeGenerate \
+--runThreadN 28 --genomeDir /scratch/vasccell/cs806/exprPhenoData/GRCh38_STARindex \
+--genomeFastaFiles /scratch/vasccell/cs806/exprPhenoData/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa \
+--sjdbGTFfile /scratch/vasccell/cs806/exprPhenoData/Homo_sapiens.GRCh38.100.gtf \
+--sjdbOverhang 101
+
+# Confirm the fastq extension is correct.
+find /scratch/vasccell/cs806/huvecRNASEQ/rawReads -type f -name "*_1.fastq.gz" -exec basename {} \; | sed 's/_1.fastq.gz//g' > /scratch/vasccell/cs806/huvecRNASEQ/huvecRNASEQ_Scripts/allSeq2.txt
+
+
+while IFS= read -r F
+do
+
+R1=${F}_1.fastq.gz
+R2=${F}_2.fastq.gz
+STAR --runMode alignReads \
+--runThreadN 28 --genomeDir /scratch/vasccell/cs806/exprPhenoData/GRCh38_STARindex \
+--readFilesIn /scratch/vasccell/cs806/huvecRNASEQ/rawReads/$R1 /scratch/vasccell/cs806/huvecRNASEQ/rawReads/$R2 \
+--readFilesCommand zcat \
+--sjdbOverhang 101 \
+--outFileNamePrefix /scratch/vasccell/cs806/huvecRNASEQ/mappedReads/$F \
+--twopassMode Basic \
+--outSAMunmapped Within \
+--outSAMstrandField intronMotif \
+--outFilterIntronMotifs RemoveNoncanonical \
+--outSAMtype SAM \
+--outFilterType BySJout \
+--limitSjdbInsertNsj 2000000  
+
+#echo $F
+#echo $R1
+#echo $R2
+
+done < /scratch/vasccell/cs806/huvecRNASEQ/huvecRNASEQ_Scripts/allSeq2.txt
+
+module load py-multiqc
+multiqc /scratch/vasccell/cs806/huvecRNASEQ/mappedReads -f --interactive -o /scratch/vasccell/cs806/huvecRNASEQ/mappedReads
+
+date
+
+

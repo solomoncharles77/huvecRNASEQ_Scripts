@@ -28,6 +28,7 @@ kelPheno <- kelPheno[match(fam$V2, kelPheno$V2), ]
 colnames(kelPheno) <- c("FID",   "IID", "meanEditLevel")
 head(kelPheno)
 write.table(kelPheno, "phenoFiles/huvecMeanEditingLevel_clean_AssocReady.txt", col.names = F, row.names = F, quote = F, sep = "\t")
+write.table(kelPheno, "phenoFiles/huvecMeanEditingLevel_clean_AssocReady_wtHeader.txt", row.names = F, quote = F, sep = "\t")
 
 ###############################################################
 # prep covariate
@@ -43,9 +44,16 @@ write.table(cov, "covFiles/huvec_Sex_3gpc_covariates_wtHeader.txt", row.names = 
 ########################################################################################################
 
 
-png("resPlots/meanGlobalEditing.png", width=1200, height=600)
-hist(kelDF$overall_editing, col = "lightyellow",
-     main = "Mean A-to-I Editing in Known Sites",
-     xlab = "",
-     breaks = 30)
-dev.off()
+# normalize the data using rank-based inverse normal transformation-------
+intTrans <- function(x){
+  y <- qnorm((rank(x,na.last="keep")-0.5)/sum(!is.na(x)))
+  return(y)
+}
+
+kelPheno$meanEditLevel <-  intTrans(kelPheno$meanEditLevel)
+kelPhenoNT <- shapiro.test(kelPheno$meanEditLevel)
+ifelse(kelPhenoNT$p.value > 0.05, "normal", "not normal")
+
+
+write.table(kelPheno, "phenoFiles/huvecMEL_Normalized_AssocReady.txt", col.names = F, row.names = F, quote = F, sep = "\t")
+write.table(kelPheno, "phenoFiles/huvecMEL_Normalized_AssocReady_wtHeader.txt", row.names = F, quote = F, sep = "\t")

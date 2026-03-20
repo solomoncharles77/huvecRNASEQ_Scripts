@@ -1,4 +1,9 @@
 
+# normalize the data using rank-based inverse normal transformation-------
+intTrans <- function(x){
+  y <- qnorm((rank(x,na.last="keep")-0.5)/sum(!is.na(x)))
+  return(y)
+}
 
 rnae <- read.csv("RNAEditingIndexer/AEI/huvecRNASeqSUM/EditingIndex.csv")
 rnae$Sample <- sub("Aligned.out.sam.sorted", "", rnae$Sample)
@@ -28,6 +33,18 @@ rnaeRand <- data.frame(fam[, c(1,2)], rnaeRand[, c(2:7)])
 colnames(rnaeRand)[1:2] <- c("FID",   "IID")
 head(rnaeRand)
 write.table(rnaeRand, "phenoFiles/huvecRandomAEI_clean_AssocReady.txt", col.names = F, row.names = F, quote = F, sep = "\t")
+write.table(rnaeRand, "phenoFiles/huvecRandomAEI_clean_AssocReady_wtHeader.txt", row.names = F, quote = F, sep = "\t")
+
+rnaeRand[, c(3:8)] <- lapply(rnaeRand[, c(3:8)], function(x) intTrans(x))
+normRand <- rnaeRand
+normRandNT <- lapply(normRand[, 3:8], function(x) shapiro.test(x)) 
+normRandNT <- do.call(rbind.data.frame, normRandNT)
+normRandNT$status <- ifelse(normRandNT$p.value > 0.05, "normal", "not normal")
+normRandNT
+
+write.table(normRand, "phenoFiles/huvecRandomAEI_Normalized_AssocReady.txt", col.names = F, row.names = F, quote = F, sep = "\t")
+write.table(normRand, "phenoFiles/huvecRandomAEI_Normalized_AssocReady_wtHeader.txt", row.names = F, quote = F, sep = "\t")
+
 
 ##########################################################################################################
 # prep covariate
@@ -52,6 +69,17 @@ rnaeRef <- data.frame(fam[, c(1,2)], rnaeRef[, c(2:7)])
 colnames(rnaeRef)[1:2] <- c("FID",   "IID")
 head(rnaeRef)
 write.table(rnaeRef, "phenoFiles/huvecRefSeqAEI_clean_AssocReady.txt", col.names = F, row.names = F, quote = F, sep = "\t")
+write.table(rnaeRef, "phenoFiles/huvecRefSeqAEI_clean_AssocReady_wtHeader.txt", row.names = F, quote = F, sep = "\t")
+
+rnaeRef[, c(3:8)] <- lapply(rnaeRef[, c(3:8)], function(x) intTrans(x))
+normRand <- rnaeRef
+normRefNT <- lapply(normRand[, 3:8], function(x) shapiro.test(x)) 
+normRefNT <- do.call(rbind.data.frame, normRefNT)
+normRefNT$status <- ifelse(normRefNT$p.value > 0.05, "normal", "not normal")
+normRefNT
+
+write.table(normRand, "phenoFiles/huvecRefSeqAEI_Normalized_AssocReady.txt", col.names = F, row.names = F, quote = F, sep = "\t")
+write.table(normRand, "phenoFiles/huvecRefSeqAEI_Normalized_AssocReady_wtHeader.txt", row.names = F, quote = F, sep = "\t")
 
 ###################################################
 rnaeMMS <- rnaeMMS[, -c(1,2,4)]
@@ -63,3 +91,14 @@ rnaeMMS <- data.frame(fam[, c(1,2)], rnaeMMS[, c(2:7)])
 colnames(rnaeMMS)[1:2] <- c("FID",   "IID")
 head(rnaeMMS)
 write.table(rnaeMMS, "phenoFiles/huvecMMSitesAEI_clean_AssocReady.txt", col.names = F, row.names = F, quote = F, sep = "\t")
+write.table(rnaeMMS, "phenoFiles/huvecMMSitesAEI_clean_AssocReady_wtHeader.txt", row.names = F, quote = F, sep = "\t")
+
+rnaeMMS[, c(3:8)] <- lapply(rnaeMMS[, c(3:8)], function(x) intTrans(x))
+normMMS <- rnaeMMS
+normMMSNT <- lapply(normMMS[, 3:8], function(x) shapiro.test(x)) 
+normMMSNT <- do.call(rbind.data.frame, normMMSNT)
+normMMSNT$status <- ifelse(normMMSNT$p.value > 0.05, "normal", "not normal")
+normMMSNT
+
+write.table(normMMS, "phenoFiles/huvecMMSitesAEI_Normalized_AssocReady.txt", col.names = F, row.names = F, quote = F, sep = "\t")
+write.table(normMMS, "phenoFiles/huvecMMSitesAEI_Normalized_AssocReady_wtHeader.txt", row.names = F, quote = F, sep = "\t")
